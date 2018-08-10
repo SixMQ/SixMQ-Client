@@ -1,0 +1,23 @@
+{
+	"name": "yurunsoft/sixmq-client",
+	"type": "library",
+    "license": "Apache-2.0",
+	"description": "SixMQ PHP 客户端",
+    "require": {
+		"yurunsoft/sixmq-struct": "dev-master"
+    },
+    "require-dev": {
+        "swoft/swoole-ide-helper": "~2.0"
+    },
+    "autoload": {
+        "psr-4" : {
+			"SixMQ\\Client\\" : "src/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "D:/projects/sixmq-struct"
+        }
+    ]
+}
