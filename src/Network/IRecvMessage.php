@@ -22,7 +22,7 @@ interface IRecvMessage
 	/**
 	 * 获取数据
 	 *
-	 * @return mixed
+	 * @return \SixMQ\Struct\BaseServerStruct
 	 */
 	public function getData();
 }

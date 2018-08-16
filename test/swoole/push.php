@@ -1,22 +1,28 @@
 <?php
 
 use SixMQ\Client\Network\SendMessage;
+use SixMQ\Client\Queue;
 require __DIR__ . '/common.php';
 
 go(function(){
+	// 实例化客户端
 	$client = new \SixMQ\Client\Network\Swoole\Client('127.0.0.1', 18086);
-	var_dump($client->connect());
-	$time = microtime(true);
-	// for($i = 0; $i < 1; ++$i)
-	while(microtime(true) - $time < 60)
+
+	// 连接
+	if(!$client->connect())
 	{
-		$client->sendMessage(new SendMessage([
-			'action'	=>	'queue.push',
-			'queueId'	=>	'test1',
-			'data'		=>	[
-				'time'	=>	microtime(true),
-			],
-		]));
-		// usleep(1000);
+		echo 'connect gg!', PHP_EOL;
+		return;
 	}
+
+	// 实例化队列
+	$queue = new Queue($client, 'test1', 3);
+	
+	// 入队列
+	var_dump($queue->push([
+		'time'	=>	microtime(true),
+	]));
+
+	// 关闭客户端连接
+	$client->close();
 });
