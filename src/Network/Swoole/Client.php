@@ -116,19 +116,6 @@ class Client implements IClient
 		$result = $this->client->connect($this->host, $this->port, $this->timeout);
 		if($result)
 		{
-			$this->timeoutTimer = swoole_timer_tick(1000, function(){
-				foreach($this->suspendCos as $coid => $option)
-				{
-					if(microtime(true) - $option['time'] >= $this->timeout)
-					{
-						Coroutine::resume($coid);
-					}
-					else
-					{
-						break;
-					}
-				}
-			});
 			$this->startReceive();
 		}
 		return $result;
@@ -176,8 +163,9 @@ class Client implements IClient
 		}
 		if(!isset($this->coReceives[$coid]))
 		{
+			$timeout = $message->getTimeout() ?? $this->timeout;
 			$this->suspendCos[$coid] = [
-				'time'	=>	microtime(true),
+				'expireTime'	=>	$timeout > -1 ? microtime(true) + $timeout : PHP_INT_MAX,
 			];
 			Coroutine::suspend();
 		}
@@ -218,7 +206,16 @@ class Client implements IClient
 		{
 			$this->recevingFlag = static::RECEVING_FLAG_START;
 			go(function(){
+				$this->startParseTimeout();
 				$this->receive();
+
+				$this->stopParseTimeout();
+				// 恢复所有监听的协程
+				foreach($this->suspendCos as $coid => $option)
+				{
+					Coroutine::resume($coid);
+				}
+				$this->suspendCos = [];
 			});
 			return true;
 		}
@@ -236,6 +233,29 @@ class Client implements IClient
 		{
 			$this->recevingFlag = static::RECEVING_FLAG_WAIT_STOP;
 		}
+	}
+
+	private function startParseTimeout()
+	{
+		$this->timeoutTimer = swoole_timer_tick(1000, function(){
+			foreach($this->suspendCos as $coid => $option)
+			{
+				// TODO:等待推送超时支持
+				if(microtime(true) >= $option['expireTime'])
+				{
+					Coroutine::resume($coid);
+				}
+				else
+				{
+					break;
+				}
+			}
+		});
+	}
+
+	private function stopParseTimeout()
+	{
+		swoole_timer_clear($this->timeoutTimer);
 	}
 
 	/**

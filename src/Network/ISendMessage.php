@@ -24,4 +24,11 @@ interface ISendMessage
 	 * @return mixed
 	 */
 	public function encode();
+
+	/**
+	 * 获取超时时间
+	 *
+	 * @return float
+	 */
+	public function getTimeout();
 }

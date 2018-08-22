@@ -10,9 +10,17 @@ class SendMessage implements ISendMessage
 	 */
 	private $data;
 
-	public function __construct($data = null)
+	/**
+	 * 超时时间，为空则默认，-1不限制
+	 *
+	 * @var float
+	 */
+	private $timeout;
+
+	public function __construct($data = null, $timeout = null)
 	{
 		$this->data = $data;
+		$this->timeout = $timeout;
 	}
 
 	/**
@@ -45,5 +53,15 @@ class SendMessage implements ISendMessage
 	{
 		$sendData = json_encode($this->data);
 		return pack('Na*', strlen($sendData), $sendData);
+	}
+	
+	/**
+	 * 获取超时时间
+	 *
+	 * @return float
+	 */
+	public function getTimeout()
+	{
+		return $this->timeout;
 	}
 }

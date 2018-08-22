@@ -57,12 +57,13 @@ class Queue
 	/**
 	 * 消息出队列
 	 *
+	 * @param boolean $block 是否阻塞等待返回，默认为false，如果没有则返回success=false
 	 * @return \SixMQ\Struct\Queue\Server\Pop
 	 */
-	public function pop()
+	public function pop($block = false)
 	{
-		$message = new Pop($this->queueId, $this->taskExpire);
-		$result = $this->client->sendMessage(new SendMessage($message));
+		$message = new Pop($this->queueId, $this->taskExpire, $block);
+		$result = $this->client->sendMessage(new SendMessage($message, -1));
 		if(!$result)
 		{
 			return null;

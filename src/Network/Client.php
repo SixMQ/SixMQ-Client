@@ -19,13 +19,13 @@ abstract class Client
 	 * @param string $handlerClass
 	 * @return \SixMQ\Client\Network\IClient
 	 */
-	public static function newInstance($host, $port, $options = [], $handlerClass = null)
+	public static function newInstance($host, $port, $timeout = 3, $options = [], $handlerClass = null)
 	{
 		if(null === $handlerClass)
 		{
 			$handlerClass = static::$handlerClass;
 		}
-		return new $handlerClass($host, $port, $options);
+		return new $handlerClass($host, $port, $timeout, $options);
 	}
 
 	/**
