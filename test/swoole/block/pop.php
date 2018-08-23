@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/common.php';
+require dirname(__DIR__) . '/common.php';
 use Swoole\Coroutine;
 use SixMQ\Client\Queue;
 use SixMQ\Client\Network\SendMessage;
@@ -17,11 +17,13 @@ go(function(){
 	}
 
 	// 实例化队列
+	// 队列ID：test1，任务最长执行时间：3秒
 	$queue = new Queue($client, 'test1', 3);
 
 	// 从队列中弹出
-	$data = $queue->pop();
+	$data = $queue->pop(-1);
 
+	// sleep(5);
 	// 判断是否有数据
 	if($data && $data->success)
 	{

@@ -128,7 +128,6 @@ class Client implements IClient
 	 */
 	public function close()
 	{
-		swoole_timer_clear($this->timeoutTimer);
 		$this->stopReceive();
 		while(static::RECEVING_FLAG_WAIT_STOP === $this->recevingFlag)
 		{
@@ -165,7 +164,7 @@ class Client implements IClient
 		{
 			$timeout = $message->getTimeout() ?? $this->timeout;
 			$this->suspendCos[$coid] = [
-				'expireTime'	=>	$timeout > -1 ? microtime(true) + $timeout : PHP_INT_MAX,
+				'expireTime'	=>	$timeout > 0 ? microtime(true) + $timeout : PHP_INT_MAX,
 			];
 			Coroutine::suspend();
 		}
@@ -240,7 +239,6 @@ class Client implements IClient
 		$this->timeoutTimer = swoole_timer_tick(1000, function(){
 			foreach($this->suspendCos as $coid => $option)
 			{
-				// TODO:等待推送超时支持
 				if(microtime(true) >= $option['expireTime'])
 				{
 					Coroutine::resume($coid);
@@ -265,9 +263,6 @@ class Client implements IClient
 	 */
 	private function receive()
 	{
-		// Coroutine::sleep(0.1); // 防止$this->recevingCoID还未被赋值
-		// $coid = Coroutine::getuid();
-		// while($coid === $this->recevingCoID && $this->client->isConnected())
 		while(static::RECEVING_FLAG_START === $this->recevingFlag && $this->client->isConnected())
 		{
 			$data = $this->client->recv();

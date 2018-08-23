@@ -11,7 +11,7 @@ class SendMessage implements ISendMessage
 	private $data;
 
 	/**
-	 * 超时时间，为空则默认，-1不限制
+	 * 超时时间，为空则默认，小于等于0则不限制
 	 *
 	 * @var float
 	 */
