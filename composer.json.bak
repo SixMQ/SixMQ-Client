@@ -14,5 +14,11 @@
         "psr-4" : {
 			"SixMQ\\Client\\" : "src/"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "D:/projects/sixmq-struct"
+        }
+    ]
 }
