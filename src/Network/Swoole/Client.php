@@ -164,7 +164,7 @@ class Client implements IClient
 		{
 			$timeout = $message->getTimeout() ?? $this->timeout;
 			$this->suspendCos[$coid] = [
-				'expireTime'	=>	$timeout > 0 ? microtime(true) + $timeout : PHP_INT_MAX,
+				'expireTime'	=>	$timeout > 0 ? (microtime(true) + $timeout) : PHP_INT_MAX,
 			];
 			Coroutine::suspend();
 		}
@@ -265,7 +265,7 @@ class Client implements IClient
 	{
 		while(static::RECEVING_FLAG_START === $this->recevingFlag && $this->client->isConnected())
 		{
-			$data = $this->client->recv();
+			$data = @$this->client->recv();
 			if('' === $data || false === $data)
 			{
 				continue;
