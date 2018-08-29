@@ -265,8 +265,13 @@ class Client implements IClient
 	{
 		while(static::RECEVING_FLAG_START === $this->recevingFlag && $this->client->isConnected())
 		{
-			$data = @$this->client->recv();
-			if('' === $data || false === $data)
+			$data = $this->client->recv(-1);
+			if('' === $data)
+			{
+				$this->client->close();
+				break;
+			}
+			if(false === $data)
 			{
 				continue;
 			}
