@@ -1,8 +1,8 @@
 {
-	"name": "sixmq/sixmq-client",
-	"type": "library",
+    "name": "sixmq/sixmq-client",
+    "type": "library",
     "license": "Apache-2.0",
-	"description": "SixMQ PHP 客户端",
+    "description": "SixMQ PHP 客户端",
     "require": {
         "php": ">=7.0.0",
         "sixmq/sixmq-struct": "dev-master"
@@ -12,7 +12,7 @@
     },
     "autoload": {
         "psr-4" : {
-			"SixMQ\\Client\\" : "src/"
+            "SixMQ\\Client\\" : "src/"
         }
     },
     "repositories": [
