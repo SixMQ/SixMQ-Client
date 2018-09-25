@@ -96,6 +96,14 @@ class Client implements IClient
 		$this->options = $options;
 		$this->recevingFlag = static::RECEVING_FLAG_STOP;
 		$this->client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
+		$this->client->set([
+			'open_eof_split'		=> false,
+			'open_length_check'     => true,
+			'package_length_type'   => 'N',
+			'package_length_offset' => 4,       //第N个字节是包长度的值
+			'package_body_offset'   => 8,       //第几个字节开始计算长度
+			'package_max_length'    => 2 * 1024 * 1024,  //协议最大长度，默认2M
+		]);
 	}
 
 	public function __destruct()
