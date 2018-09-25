@@ -21,6 +21,13 @@ class Client implements IClient
 	public $port;
 
 	/**
+	 * 网络超时时间，单位：秒
+	 *
+	 * @var integer
+	 */
+	public $timeout;
+
+	/**
 	 * 其它选项
 	 *
 	 * @var array
@@ -28,21 +35,26 @@ class Client implements IClient
 	public $options;
 
 	/**
-	 * Swoole 协程客户端
+	 * 连接句柄
 	 *
-	 * @param string $host
-	 * @param int $port
-	 * @param array $options
-	 * @var \Swoole\Coroutine\Client
+	 * @var \resource
 	 */
 	private $client;
 
-	public function __construct($host, $port, $options = [])
+	public function __construct($host, $port, $timeout = 3, $options = [])
 	{
 		$this->host = $host;
 		$this->port = $port;
+		$this->timeout = $timeout;
 		$this->options = $options;
-		$this->client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
+	}
+
+	public function __destruct()
+	{
+		if(null !== $this->isConnected())
+		{
+			$this->close();
+		}
 	}
 
 	/**
@@ -52,7 +64,18 @@ class Client implements IClient
 	 */
 	public function connect()
 	{
-		return $this->client->connect($this->host, $this->port, $this->options['timeout'] ?? 3);
+		$client = stream_socket_client("tcp://{$this->host}:{$this->port}", $errno, $errstr, $this->timeout);
+		$result = false !== $client;
+		if($result)
+		{
+			$this->client = $client;
+			stream_set_timeout($client, 0, $this->timeout * 1000000);
+		}
+		else
+		{
+			throw new \Exception(sprintf('SixMQ connect fail, code: %s, message: %s', $errno, $errstr));
+		}
+		return $result;
 	}
 
 	/**
@@ -62,7 +85,11 @@ class Client implements IClient
 	 */
 	public function close()
 	{
-		$this->client->close();
+		if(null !== $this->client)
+		{
+			fclose($this->client);
+			$this->client = null;
+		}
 	}
 
 	/**
@@ -72,7 +99,7 @@ class Client implements IClient
 	 */
 	public function isConnected()
 	{
-		return $this->client->isConnected();
+		return null === $this->client;
 	}
 
 	/**
@@ -83,17 +110,56 @@ class Client implements IClient
 	 */
 	public function sendMessage(\SixMQ\Client\Network\ISendMessage $message)
 	{
-		if(!$this->client->send($message->encode()))
+		if(false === fwrite($this->client, $message->encode()))
 		{
 			return false; // 发送失败
 		}
-		// var_dump('recv');
-		$data = $this->client->recv();
-		if(!$data)
+		$timeout = $message->getTimeout() ?? $this->timeout;
+		return $this->receive($timeout);
+	}
+
+	/**
+	 * 接收
+	 *
+	 * @return void
+	 */
+	private function receive($timeout = null)
+	{
+		if(null === $timeout)
 		{
-			return false; // 接收失败
+			stream_set_timeout($this->client, 0, $this->timeout * 1000000);
 		}
-		return new RecvMessage($data);
+		else if(-1 === $timeout)
+		{
+			stream_set_timeout($this->client, PHP_INT_MAX);
+		}
+		else {
+			stream_set_timeout($this->client, 0, $timeout * 1000000);
+		}
+		$versionData = fread($this->client, 4);
+		if(!$versionData)
+		{
+			return false;
+		}
+		$lengthData = fread($this->client, 4);
+		if(!$lengthData)
+		{
+			return false;
+		}
+		$length = unpack('N', $lengthData)[1];
+		$left = $length;
+		$data = '';
+		while ($left > 0 && !feof($this->client))
+		{
+			$chunk = fread($this->client, min(8192, $left));
+			if ($chunk)
+			{
+				$data .= $chunk;
+				$left -= strlen($chunk);
+			}
+		}
+		$message = new RecvMessage($versionData . $lengthData . $data);
+		return $message;
 	}
 
 }
