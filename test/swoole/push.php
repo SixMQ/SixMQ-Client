@@ -2,7 +2,7 @@
 
 use SixMQ\Client\Network\SendMessage;
 use SixMQ\Client\Queue;
-require __DIR__ . '/common.php';
+require dirname(__DIR__) . '/common.php';
 
 go(function(){
 	// 实例化客户端
@@ -21,7 +21,7 @@ go(function(){
 	// 入队列
 	var_dump($queue->push([
 		'time'	=>	microtime(true),
-	]));
+	], -1));
 
 	// 关闭客户端连接
 	$client->close();

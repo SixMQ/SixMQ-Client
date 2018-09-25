@@ -1,13 +1,13 @@
 <?php
 
 require dirname(__DIR__, 2) . '/common.php';
-use SixMQ\Client\Network\SendMessage;
 use SixMQ\Client\Queue;
+use SixMQ\Client\Network\Client;
+use SixMQ\Client\Network\SendMessage;
 
 go(function(){
 	// 实例化客户端
-	// $client = new \SixMQ\Client\Network\Swoole\Client('192.168.0.221', 18086);
-	$client = \SixMQ\Client\Network\Client::newInstance('127.0.0.1', 18086);
+	$client = Client::newInstance('127.0.0.1', 18086);
 
 	// 连接
 	if(!$client->connect())

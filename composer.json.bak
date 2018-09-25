@@ -5,7 +5,7 @@
 	"description": "SixMQ PHP 客户端",
     "require": {
         "php": ">=7.0.0",
-		"sixmq/sixmq-struct": "dev-master"
+        "sixmq/sixmq-struct": "dev-master"
     },
     "require-dev": {
         "swoft/swoole-ide-helper": "~2.0"

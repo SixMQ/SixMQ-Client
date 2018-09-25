@@ -1,13 +1,14 @@
 <?php
 
-require dirname(__DIR__) . '/common.php';
+require dirname(__DIR__, 2) . '/common.php';
 use Swoole\Coroutine;
 use SixMQ\Client\Queue;
+use SixMQ\Client\Network\Client;
 use SixMQ\Client\Network\SendMessage;
 
 go(function(){
 	// 实例化客户端
-	$client = new \SixMQ\Client\Network\Swoole\Client('127.0.0.1', 18086);
+	$client = Client::newInstance('127.0.0.1', 18086);
 
 	// 连接
 	if(!$client->connect())
@@ -17,11 +18,13 @@ go(function(){
 	}
 
 	// 实例化队列
-	$queue = new Queue($client, 'test1', 3);
+	// 队列ID：test1，任务最长执行时间：3秒
+	$queue = new Queue($client, 'test12', 3);
 
 	// 从队列中弹出
-	$data = $queue->pop();
-
+	$data = $queue->pop(-1);
+	var_dump($data);
+	// sleep(5);
 	// 判断是否有数据
 	if($data && $data->success)
 	{

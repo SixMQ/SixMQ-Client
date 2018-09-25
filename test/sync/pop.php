@@ -4,10 +4,11 @@ require dirname(__DIR__) . '/common.php';
 use Swoole\Coroutine;
 use SixMQ\Client\Queue;
 use SixMQ\Client\Network\SendMessage;
+use SixMQ\Client\Network\Client;
 
 go(function(){
 	// 实例化客户端
-	$client = new \SixMQ\Client\Network\Swoole\Client('127.0.0.1', 18086);
+	$client = Client::newInstance('127.0.0.1', 18086);
 
 	// 连接
 	if(!$client->connect())
