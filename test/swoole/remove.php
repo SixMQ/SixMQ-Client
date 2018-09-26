@@ -17,11 +17,17 @@ go(function(){
 
     // 实例化队列
     $queue = new Queue($client, 'test1', 3);
+
+    $messageId = '0001-20180926-2';
     
+    $message = $queue->getMessage($messageId);
+    var_dump($message);
+
     // 入队列
-    var_dump($queue->push([
-        'time'    =>    microtime(true),
-    ]));
+    var_dump($queue->remove($messageId));
+    
+    $message = $queue->getMessage($messageId);
+    var_dump($message);
 
     // 关闭客户端连接
     $client->close();

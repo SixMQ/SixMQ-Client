@@ -4,8 +4,10 @@ namespace SixMQ\Client;
 use SixMQ\Client\Network\IClient;
 use SixMQ\Struct\Queue\Client\Pop;
 use SixMQ\Struct\Queue\Client\Push;
-use SixMQ\Struct\Queue\Client\Complete;
 use SixMQ\Client\Network\SendMessage;
+use SixMQ\Struct\Queue\Client\Remove;
+use SixMQ\Struct\Queue\Client\Complete;
+use SixMQ\Struct\Queue\Client\GetMessage;
 
 class Queue
 {
@@ -92,6 +94,42 @@ class Queue
             return false;
         }
         return $result->getData()->success;
+    }
+
+    /**
+     * 获取消息数据
+     *
+     * @param string $messageId
+     * @return \SixMQ\Struct\Queue\Server\GetMessage
+     */
+    public function getMessage($messageId)
+    {
+        $message = new GetMessage($messageId);
+
+        $result = $this->client->sendMessage(new SendMessage($message));
+        if(!$result)
+        {
+            return null;
+        }
+        return $result->getData();
+    }
+
+    /**
+     * 将消息移出队列
+     *
+     * @param string $messageId
+     * @return \SixMQ\Struct\Queue\Server\Reply
+     */
+    public function remove($messageId)
+    {
+        $message = new Remove($messageId);
+
+        $result = $this->client->sendMessage(new SendMessage($message));
+        if(!$result)
+        {
+            return null;
+        }
+        return $result->getData();
     }
 
     /**
