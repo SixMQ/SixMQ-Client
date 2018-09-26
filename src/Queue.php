@@ -48,10 +48,45 @@ class Queue
      * @param int $retry 消费失败重试次数
      * @return \SixMQ\Struct\Queue\Server\Push|null
      */
-    public function push($data, $block = 0, $timeout = -1, $retry = 3)
+    public function push($data, $block = 0, $timeout = -1, $retry = 3, $options = [])
     {
-        $message = new Push($this->queueId, $data, $block, $timeout, $retry);
-        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout($block)));
+        if(!isset($options['block']))
+        {
+            $options['block'] = $block;
+        }
+        if(!isset($options['timeout']))
+        {
+            $options['timeout'] = $timeout;
+        }
+        if(!isset($options['retry']))
+        {
+            $options['retry'] = $retry;
+        }
+        $message = new Push($this->queueId, $data, $options);
+        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout($options['block'])));
+        if(!$result)
+        {
+            return null;
+        }
+        return $result->getData();
+    }
+
+    /**
+     * 推送延迟消息
+     *
+     * @param mixed $data
+     * @param float $delay
+     * @param array $options
+     * @return \SixMQ\Struct\Queue\Server\Push|null
+     */
+    public function pushDelay($data, $delay, $options = [])
+    {
+        if(!isset($options['delay']))
+        {
+            $options['delay'] = $delay;
+        }
+        $message = new Push($this->queueId, $data, $options);
+        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout($options['block'] ?? 0)));
         if(!$result)
         {
             return null;
