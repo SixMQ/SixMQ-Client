@@ -43,27 +43,13 @@ class Queue
      * 消息入队列
      *
      * @param mixed $data
-     * @param boolean $block 是否阻塞等待返回，0：默认，立即返回；小于0：阻塞等待，不限制时长；大于0：阻塞等待时长，单位：秒
-     * @param float $timeout 超过超时时间则从队列中移除，单位：秒，-1则为不限制
-     * @param int $retry 消费失败重试次数
+     * @param array $options
      * @return \SixMQ\Struct\Queue\Server\Push|null
      */
-    public function push($data, $block = 0, $timeout = -1, $retry = 3, $options = [])
+    public function push($data, $options = [])
     {
-        if(!isset($options['block']))
-        {
-            $options['block'] = $block;
-        }
-        if(!isset($options['timeout']))
-        {
-            $options['timeout'] = $timeout;
-        }
-        if(!isset($options['retry']))
-        {
-            $options['retry'] = $retry;
-        }
         $message = new Push($this->queueId, $data, $options);
-        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout($options['block'])));
+        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout($options['block'] ?? 0)));
         if(!$result)
         {
             return null;

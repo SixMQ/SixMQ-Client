@@ -18,7 +18,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "D:/projects/sixmq-struct"
+            "url": "/mnt/d/projects/sixmq-struct"
         }
     ]
 }

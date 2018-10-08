@@ -22,7 +22,7 @@ go(function(){
     // 入队列
     var_dump($queue->push([
         'time'    =>    microtime(true),
-    ], -1));
+    ], ['block'=>-1]));
 
     // 关闭客户端连接
     $client->close();
