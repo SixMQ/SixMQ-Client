@@ -170,7 +170,11 @@ class Client implements IClient
         }
         if(!isset($this->coReceives[$coid]))
         {
-            $timeout = $message->getTimeout() ?? $this->timeout;
+            $timeout = $message->getTimeout();
+            if(null === $timeout)
+            {
+                $timeout = $this->timeout;
+            }
             $this->suspendCos[$coid] = [
                 'expireTime'    =>    $timeout > 0 ? (microtime(true) + $timeout) : PHP_INT_MAX,
             ];

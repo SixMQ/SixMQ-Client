@@ -49,7 +49,7 @@ class Queue
     public function push($data, $options = [])
     {
         $message = new Push($this->queueId, $data, $options);
-        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout($options['block'] ?? 0)));
+        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout(isset($options['block']) ? $options['block'] : 0)));
         if(!$result)
         {
             return null;
@@ -72,7 +72,7 @@ class Queue
             $options['delay'] = $delay;
         }
         $message = new Push($this->queueId, $data, $options);
-        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout($options['block'] ?? 0)));
+        $result = $this->client->sendMessage(new SendMessage($message, $this->getTimeout(isset($options['block']) ? $options['block'] : 0)));
         if(!$result)
         {
             return null;

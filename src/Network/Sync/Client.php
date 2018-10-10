@@ -114,7 +114,11 @@ class Client implements IClient
         {
             return false; // 发送失败
         }
-        $timeout = $message->getTimeout() ?? $this->timeout;
+        $timeout = $message->getTimeout();
+        if(null === $timeout)
+        {
+            $timeout = $this->timeout;
+        }
         return $this->receive($timeout);
     }
 
