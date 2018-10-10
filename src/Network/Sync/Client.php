@@ -99,7 +99,7 @@ class Client implements IClient
      */
     public function isConnected()
     {
-        return null === $this->client;
+        return null !== $this->client;
     }
 
     /**
