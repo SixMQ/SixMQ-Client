@@ -5,9 +5,9 @@ use SixMQ\Client\Network\Client;
 use SixMQ\Client\Network\SendMessage;
 require dirname(__DIR__) . '/common.php';
 
-go(function(){
+// go(function(){
     // 实例化客户端
-    $client = Client::newInstance('127.0.0.1', 18086);
+    $client = Client::newInstance('192.168.0.233', 18086);
 
     // 连接
     if(!$client->connect())
@@ -17,15 +17,16 @@ go(function(){
     }
 
     // 实例化队列
-    $queue = new Queue($client, 'test1', 3);
+    $queue = new Queue($client, 'XinchengOrder', 60);
     
     // 入队列
     var_dump($queue->push([
-        'time'    =>    microtime(true),
+        // 'time'    =>    microtime(true),
     ], [
-        'block' =>  -1,
+        // 'block' =>  -1,
+        'groupId'   =>  '123456',
     ]));
 
     // 关闭客户端连接
     $client->close();
-});
+// });
