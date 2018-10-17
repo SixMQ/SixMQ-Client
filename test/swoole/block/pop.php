@@ -18,7 +18,7 @@ go(function(){
 
     // 实例化队列
     // 队列ID：test1，任务最长执行时间：3秒
-    $queue = new Queue($client, 'test1', 3);
+    $queue = new Queue($client, 'test12', 3);
 
     // 从队列中弹出
     $data = $queue->pop(-1);

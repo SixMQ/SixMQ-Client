@@ -23,7 +23,7 @@ go(function(){
         'time'    =>    microtime(true),
     ], [
         'groupId'   =>  'testGroup1',
-        'block'     =>  -1,
+        // 'block'     =>  -1,
     ]));
 
     // 关闭客户端连接
