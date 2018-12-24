@@ -60,41 +60,12 @@ class Client implements IClient
      */
     private $client;
 
-    /**
-     * 挂起的协程们
-     *
-     * @var array
-     */
-    private $suspendCos = [];
-
-    /**
-     * 协程接收的数据们
-     *
-     * @var array
-     */
-    private $coReceives = [];
-
-    /**
-     * 接收数据的标志
-     *
-     * @var int
-     */
-    private $recevingFlag;
-
-    /**
-     * 超时计时器
-     *
-     * @var int
-     */
-    private $timeoutTimer;
-
     public function __construct($host, $port, $timeout = 3, $options = [])
     {
         $this->host = $host;
         $this->port = $port;
         $this->timeout = $timeout;
         $this->options = $options;
-        $this->recevingFlag = static::RECEVING_FLAG_STOP;
         $this->client = new \Swoole\Coroutine\Client(SWOOLE_SOCK_TCP);
         $this->client->set([
             'open_eof_split'        => false,
@@ -122,10 +93,6 @@ class Client implements IClient
     public function connect()
     {
         $result = $this->client->connect($this->host, $this->port, $this->timeout);
-        if($result)
-        {
-            $this->startReceive();
-        }
         return $result;
     }
 
@@ -136,11 +103,6 @@ class Client implements IClient
      */
     public function close()
     {
-        $this->stopReceive();
-        while(static::RECEVING_FLAG_WAIT_STOP === $this->recevingFlag)
-        {
-            Coroutine::sleep(0.001);
-        }
         $this->client->close();
     }
 
@@ -162,110 +124,16 @@ class Client implements IClient
      */
     public function sendMessage(\SixMQ\Client\Network\ISendMessage $message)
     {
-        $coid = Coroutine::getuid();
-        $message->getData()->flag = $coid;
         if(!$this->client->send($message->encode()))
         {
             return false; // 发送失败
         }
-        if(!isset($this->coReceives[$coid]))
+        $timeout = $message->getTimeout();
+        if(null === $timeout)
         {
-            $timeout = $message->getTimeout();
-            if(null === $timeout)
-            {
-                $timeout = $this->timeout;
-            }
-            $this->suspendCos[$coid] = [
-                'expireTime'    =>    $timeout > 0 ? (microtime(true) + $timeout) : PHP_INT_MAX,
-            ];
-            Coroutine::suspend();
+            $timeout = $this->timeout;
         }
-        unset($this->suspendCos[$coid]);
-        if(isset($this->coReceives[$coid]))
-        {
-            $result = $this->coReceives[$coid];
-            unset($this->coReceives[$coid]);
-            return $result;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    /**
-     * 开始接收
-     *
-     * @return void
-     */
-    private function startReceive()
-    {
-        switch($this->recevingFlag)
-        {
-            case static::RECEVING_FLAG_WAIT_STOP:
-                while(static::RECEVING_FLAG_WAIT_STOP === $this->recevingFlag)
-                {
-                    Coroutine::sleep(0.001);
-                }
-                break;
-            case static::RECEVING_FLAG_STOP:
-                break;
-            default:
-                return false;
-        }
-        if(static::RECEVING_FLAG_STOP === $this->recevingFlag)
-        {
-            $this->recevingFlag = static::RECEVING_FLAG_START;
-            go(function(){
-                $this->startParseTimeout();
-                $this->receive();
-
-                $this->stopParseTimeout();
-                // 恢复所有监听的协程
-                foreach($this->suspendCos as $coid => $option)
-                {
-                    Coroutine::resume($coid);
-                }
-                $this->suspendCos = [];
-            });
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * 停止接收
-     *
-     * @return void
-     */
-    private function stopReceive()
-    {
-        if(static::RECEVING_FLAG_START === $this->recevingFlag)
-        {
-            $this->recevingFlag = static::RECEVING_FLAG_WAIT_STOP;
-        }
-    }
-
-    private function startParseTimeout()
-    {
-        $this->timeoutTimer = swoole_timer_tick(1000, function(){
-            foreach($this->suspendCos as $coid => $option)
-            {
-                if(microtime(true) >= $option['expireTime'])
-                {
-                    Coroutine::resume($coid);
-                }
-                else
-                {
-                    break;
-                }
-            }
-        });
-    }
-
-    private function stopParseTimeout()
-    {
-        swoole_timer_clear($this->timeoutTimer);
+        return $this->receive($timeout);
     }
 
     /**
@@ -273,32 +141,15 @@ class Client implements IClient
      *
      * @return void
      */
-    private function receive()
+    private function receive($timeout)
     {
-        while(static::RECEVING_FLAG_START === $this->recevingFlag && $this->client->isConnected())
+        $data = $this->client->recv($timeout);
+        if('' === $data || false === $data)
         {
-            $data = $this->client->recv(-1);
-            if('' === $data)
-            {
-                $this->client->close();
-                break;
-            }
-            if(false === $data)
-            {
-                continue;
-            }
-            $message = new RecvMessage($data);
-            $flag = $message->getData()->flag;
-            if(is_int($flag) && isset($this->suspendCos[$flag]))
-            {
-                $this->coReceives[$flag] = $message;
-                Coroutine::resume($flag);
-            }
-            else
-            {
-
-            }
+            $this->client->close();
+            return false;
         }
-        $this->recevingFlag = static::RECEVING_FLAG_STOP;
+        $message = new RecvMessage($data);
+        return $message;
     }
 }
