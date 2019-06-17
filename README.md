@@ -8,9 +8,9 @@
 
 此为 [SixMQ](https://github.com/SixMQ/SixMQ) PHP 客户端项目！
 
-[文档传送门](https://github.com/SixMQ/SixMQ/blob/master/doc/README.md)
+[文档传送门](https://github.com/SixMQ/SixMQ-Client/blob/master/doc/README.md)
 
-[示例传送门](https://github.com/SixMQ/SixMQ/tree/master/examples)
+[示例传送门](https://github.com/SixMQ/SixMQ-Client/tree/master/examples)
 
 ## 运行环境
 
