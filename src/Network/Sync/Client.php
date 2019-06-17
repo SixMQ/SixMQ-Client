@@ -1,10 +1,10 @@
 <?php
 namespace SixMQ\Client\Network\Sync;
 
-use SixMQ\Client\Network\IClient;
 use SixMQ\Client\Network\RecvMessage;
+use SixMQ\Client\Network\BaseClient;
 
-class Client implements IClient
+class Client extends BaseClient
 {
     /**
      * 服务器地址

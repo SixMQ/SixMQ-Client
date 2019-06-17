@@ -32,4 +32,13 @@ interface IClient
      */
     public function sendMessage(\SixMQ\Client\Network\ISendMessage $message);
 
+    /**
+     * 登录
+     *
+     * @param string $username
+     * @param string $password
+     * @return boolean
+     */
+    public function login($username, $password);
+
 }

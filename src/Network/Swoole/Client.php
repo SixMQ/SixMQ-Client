@@ -1,11 +1,10 @@
 <?php
 namespace SixMQ\Client\Network\Swoole;
 
-use SixMQ\Client\Network\IClient;
+use SixMQ\Client\Network\BaseClient;
 use SixMQ\Client\Network\RecvMessage;
-use Swoole\Coroutine;
 
-class Client implements IClient
+class Client extends BaseClient
 {
     /**
      * 开始接收
