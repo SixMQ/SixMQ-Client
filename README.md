@@ -12,6 +12,21 @@
 
 [示例传送门](https://github.com/SixMQ/SixMQ-Client/tree/master/examples)
 
+## Composer
+
+本项目可以使用composer安装，遵循psr-4自动加载规则，在你的 `composer.json` 中加入下面的内容
+```json
+{
+    "require": {
+        "sixmq/sixmq-client": "^1.0"
+    }
+}
+```
+
+然后执行 `composer update` 安装。
+
+之后你便可以使用 `include "vendor/autoload.php";` 来自动加载类。（ps：不要忘了namespace）
+
 ## 运行环境
 
 - [PHP](https://php.net/) >= 7.0
