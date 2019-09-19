@@ -125,6 +125,7 @@ class Client extends BaseClient
     {
         if(!$this->client->send($message->encode()))
         {
+            $this->client->close();
             return false; // 发送失败
         }
         $timeout = $message->getTimeout();
@@ -143,7 +144,7 @@ class Client extends BaseClient
     private function receive($timeout)
     {
         $data = $this->client->recv($timeout);
-        if('' === $data || false === $data)
+        if('' === $data)
         {
             $this->client->close();
             return false;
