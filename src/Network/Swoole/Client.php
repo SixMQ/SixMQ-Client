@@ -139,7 +139,7 @@ class Client extends BaseClient
     /**
      * 接收
      *
-     * @return void
+     * @return \SixMQ\Client\Network\RecvMessage|boolean
      */
     private function receive($timeout)
     {
@@ -147,6 +147,10 @@ class Client extends BaseClient
         if('' === $data)
         {
             $this->client->close();
+            return false;
+        }
+        if(false === $data)
+        {
             return false;
         }
         $message = new RecvMessage($data);
