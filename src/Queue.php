@@ -108,7 +108,7 @@ class Queue
      */
     public function complete($messageId, $success, $data = null)
     {
-        $message = new Complete($this->queueId, $messageId, $success, $data);
+        $message = new Complete($messageId, $success, $data);
         $result = $this->client->sendMessage(new SendMessage($message));
         if(!$result)
         {
