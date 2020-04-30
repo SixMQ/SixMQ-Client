@@ -151,6 +151,10 @@ class Client extends BaseClient
         }
         if(false === $data)
         {
+            if(110 !== $this->client->errCode)
+            {
+                $this->client->close();
+            }
             return false;
         }
         $message = new RecvMessage($data);
